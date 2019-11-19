@@ -1,16 +1,22 @@
 CC = gcc
-CFLAGS = -Wall -std=gnu99 -g -DDEBUG1_
+CFLAGS = -Wall -std=gnu99
 LD = gcc
 LDFLAGS = -g -std=gnu99
 LDLIBS = 
 
-SRCS = dht.c bcm2835.c
-OBJS = dht.o bcm2835.o
-TARGETS = dht
+DEBUGFLAG = 0
+
+SRCS = dht-cli.c dht.c bcm2835.c
+OBJS = dht-cli.o dht.o bcm2835.o
+TARGETS = dht-cli
 
 all: ${TARGETS}
 
-dht: $(OBJS)
+dht-cli: $(OBJS)
+	$(LD) -o $@ $^ $(LDLIBS) $(LDFLAGS)
+
+debug: CFLAGS += -DDEBUG -g
+debug: $(OBJS)
 	$(LD) -o $@ $^ $(LDLIBS) $(LDFLAGS)
 
 %.o: %.c 

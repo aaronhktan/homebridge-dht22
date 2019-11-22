@@ -21,11 +21,13 @@ int main(int argc, char **argv) {
     }
   }
 
-  dht_init(pin);
-  dht22_data_t data;
-  int err = dht_read_data(pin, retries, &data);
-  if (!err) {
-    printf("Relative humidity: %f\n", data.hum);
-    printf("Temperature: %f\n", data.temp);
+  double humidity, temperature;
+
+  DHT_init(pin);
+  int err = DHT_read_data(pin, retries, &humidity, &temperature);
+  if (err) {
+    printf("Couldn't read temperature!\n");
   }
+  printf("Relative humidity: %f\n", humidity);
+  printf("Temperature: %f\n", temperature);
 }

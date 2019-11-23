@@ -11,11 +11,13 @@
             do { if (DEBUG_PRINT) fprintf(fd, fmt, __VA_ARGS__); } while (0)
 
 // Errors
-#define NO_ERROR  0
-#define ETIME     1 // Timeout
-#define EDRIVER   2 // Driver failed to init
-#define EPARITY   3 // Checksum failed
-#define EINVAL    4 // Invalid argument
+enum Error {
+  NO_ERROR,
+  ERROR_TIME,        // Timeout
+  ERROR_DRIVER,      // Driver failed to init
+  ERROR_PARITY,      // Checksum failed
+  ERROR_INVAL,       // Invalid argument
+};
 
 // Pin defines
 #define DHT_PIN 4

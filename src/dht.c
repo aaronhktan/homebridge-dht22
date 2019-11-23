@@ -11,7 +11,7 @@
 
 // Poll pin for timeout_cycles until it changes to level or times out
 // Returns 0 after pin changes to and then away from level,
-// ETIME if timeout_cycles has passed without the level changing
+// ERROR_TIME if timeout_cycles has passed without the level changing
 static int level_or_error(const uint8_t pin, const uint16_t level,
                           const uint32_t timeout_cycles) {
   for (int i = 0; i < timeout_cycles; i++) {
@@ -20,7 +20,7 @@ static int level_or_error(const uint8_t pin, const uint16_t level,
       return 0;
     }
   }
-  return ETIME;
+  return ERROR_TIME;
 }
 
 // Counts number of cycles that pin is at level
@@ -50,11 +50,11 @@ static int DHT_get_data(int pin, int *cycles) {
   // start of communication
   if (level_or_error(pin, LOW, SENSOR_WAIT_TIME_CYCLES)) {
     debug_print(stderr, "%s\n", "Timed out waiting for sensor response low\n");
-    return ETIME;
+    return ERROR_TIME;
   }
   if (level_or_error(pin, HIGH, SENSOR_WAIT_TIME_CYCLES)) {
     debug_print(stderr, "%s\n", "Timed out waiting for sensor response high\n");
-    return ETIME;
+    return ERROR_TIME;
   }
 
   // Now, start reading data
@@ -71,7 +71,7 @@ static int DHT_get_data(int pin, int *cycles) {
   for (int i = 0; i < 80; i += 2) {
     debug_print(stdout, "%d: Low: %d; high: %d\n", i / 2, cycles[i], cycles[i+1]);
     if (cycles[i] == TIMEOUT_CYCLES || cycles[i+1] == TIMEOUT_CYCLES) {
-      return ETIME;
+      return ERROR_TIME;
     }
   }
 
@@ -98,7 +98,7 @@ static int DHT_process_data(const int *cycles, uint8_t *data) {
   // Check the parity; parity is fifth byte of transmitted data
   if (!(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) {
     debug_print(stderr, "%s\n", "Checksum failed\n");
-    return EPARITY;
+    return ERROR_PARITY;
   }
 
   return NO_ERROR;
@@ -134,7 +134,7 @@ static int DHT_convert_data(const uint8_t *data,
 int DHT_init(const int pin) {
   if (!bcm2835_init()) {
     debug_print(stderr, "%s\n", "Couldn't init bcm2835!\n");
-    return EDRIVER;
+    return ERROR_DRIVER;
   }
 
   // Set up the pin as having a pull-up resistor
@@ -148,7 +148,7 @@ int DHT_read_data(const int pin, const int max_retries,
                   double *humidity, double *temperature) {
   // Check for valid arguments
   if (!humidity || !temperature) {
-    return EINVAL;
+    return ERROR_INVAL;
   }
 
   // Prevent swapping

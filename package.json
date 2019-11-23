@@ -1,0 +1,26 @@
+{
+  "name": "homebridge-dht22",
+  "version": "0.0.1",
+  "description": "A Homebridge plugin for the DHT22 temperature and humidity sensor connected to a Raspberry Pi 3.",
+  "private": true,
+  "gypfile": true,
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "node-addon-api": "^1.0.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaronhktan/homebridge-dht22.git"
+  },
+  "author": "Aaron Tan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aaronhktan/homebridge-dht22/issues"
+  },
+  "homepage": "https://github.com/aaronhktan/homebridge-dht22#readme"
+}

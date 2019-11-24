@@ -1,0 +1,2 @@
+src/c/bcm2835.c linguist-vendored=true
+src/c/bcm2835.h linguist-vendored=true

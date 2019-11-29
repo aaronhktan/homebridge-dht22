@@ -1,6 +1,7 @@
 const DHT22 = require('bindings')('homebridge-dht22');
 
 const moment = require('moment'); // Time formatting
+const mqtt = require('mqtt'); // MQTT client
 const os = require('os'); // Hostname
 
 // Services represent a service provided by a device,
@@ -35,7 +36,10 @@ function DHTAccessory(log, config) {
   this.maxHumDelta = config['maxHumDelta'] || 5;
   this.tempOffset = config['tempOffset'] || 0;
   this.humOffset = config['humOffset'] || 0;
+  this.enableFakeGato = config['enableFakeGato'] || false;
   this.fakeGatoStoragePath = config['fakeGatoStoragePath'];
+  this.enableMQTT = config['enableMQTT'] || false;
+  this.mqttConfig = config['mqtt'];
 
   // Internal variables to keep track of current temperature and humidity
   this._currentTemp = null;
@@ -59,11 +63,18 @@ function DHTAccessory(log, config) {
   this.humidityService = humidityService;
 
   // Start FakeGato for logging historical data
-  this.fakeGatoHistoryService = new FakeGatoHistoryService("weather", this, {
+  if (this.enableFakeGato) {
+    this.fakeGatoHistoryService = new FakeGatoHistoryService("weather", this, {
       storage: 'fs',
       filename: `DHT22-${os.hostname}-${this.pin}.json`,
       folder: this.fakeGatoStoragePath
-  });
+    });
+  }
+
+  // Set up MQTT client
+  if (this.enableMQTT) {
+    this.setUpMQTT();
+  }
 
   // Periodically update the values
   this.refreshData();
@@ -87,10 +98,15 @@ Object.defineProperty(DHTAccessory.prototype, "temp", {
     this._currentTemperature = temperatureReading + this.tempOffset;
     this.temperatureService.getCharacteristic(Characteristic.CurrentTemperature)
       .updateValue(this._currentTemperature);
-    this.fakeGatoHistoryService.addEntry({
-      time: moment().unix(),
-      temp: this._currentTemperature,
-    });
+    if (this.enableFakeGato) {
+      this.fakeGatoHistoryService.addEntry({
+        time: moment().unix(),
+        temp: this._currentTemperature,
+      });
+    }
+    if (this.enableMQTT) {
+      this.publishToMQTT(this.temperatureTopic, this._currentTemperature);
+    }
   },
 
   get: function() {
@@ -111,10 +127,15 @@ Object.defineProperty(DHTAccessory.prototype, "hum", {
     this._currentHumidity = humidityReading + this.humOffset;
     this.humidityService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
       .updateValue(this._currentHumidity);
-    this.fakeGatoHistoryService.addEntry({
-      time: moment().unix(),
-      humidity: this._currentHumidity,
-    });
+    if (this.enableFakeGato) {
+      this.fakeGatoHistoryService.addEntry({
+        time: moment().unix(),
+        humidity: this._currentHumidity,
+      });
+    }
+    if (this.enableMQTT) {
+      this.publishToMQTT(this.humidityTopic, this._currentHumidity);
+    }
   },
 
   get: function() {
@@ -122,15 +143,49 @@ Object.defineProperty(DHTAccessory.prototype, "hum", {
   }
 });
 
+// Sets up MQTT client so that we can send data
+DHTAccessory.prototype.setUpMQTT = function() {
+  if (!this.enableMQTT) {
+    this.log.info("MQTT not enabled");
+    return;
+  }
 
+  if (!this.mqttConfig) {
+    this.log.error("No MQTT config found");
+    return;
+  }
+
+  this.mqttUrl = this.mqttConfig.url;
+  this.temperatureTopic = this.mqttConfig.temperatureTopic || 'temperature';
+  this.humidityTopic = this.mqttConfig.humidityTopic || 'humidity';
+
+  this.mqttClient = mqtt.connect(this.mqttUrl);
+  this.mqttClient.on("connect", () => {
+    this.log(`MQTT client connected to ${this.mqttUrl}`);
+  });
+  this.mqttClient.on("error", (err) => {
+    this.log(`MQTT client error: ${err}`);
+    client.end();
+  });
+}
+
+// Sends data to MQTT broker
+DHTAccessory.prototype.publishToMQTT = function(topic, value) {
+  if (!this.mqttClient.connected || !topic || !value) {
+    this.log.error("MQTT client not connect, or no topic or value for MQTT");
+    return;
+  }
+  this.mqttClient.publish(topic, String(value));
+}
+
+// Get data from the sensor
 DHTAccessory.prototype.refreshData = function() {
-  // Get data from the sensor
   let data;
   data = DHT22.getData(this.pin, this.maxRetries);
 
   // If error, set to error state
   if (data.hasOwnProperty('errcode')) {
-    this.log(`${moment().format("YYYY-MM-DD HH:mm:ss")} Error: ${data.errmsg}`);
+    this.log(`Error: ${data.errmsg}`);
     // Updating a value with Error class sets status in HomeKit to 'Not responding'
     this.temperatureService.getCharacteristic(Characteristic.CurrentTemperature)
       .updateValue(Error(data.errmsg));
@@ -140,7 +195,7 @@ DHTAccessory.prototype.refreshData = function() {
   }
   
   // Set temperature and humidity from what we polled
-  this.log(`${moment().format("YYYY-MM-DD HH:mm:ss")} Temp: ${data.temp}, Hum: ${data.hum}`);
+  this.log(`Temp: ${data.temp}, Hum: ${data.hum}`);
   this.temp = data.temp;
   this.hum = data.hum;
  }

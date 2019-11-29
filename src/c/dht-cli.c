@@ -30,4 +30,5 @@ int main(int argc, char **argv) {
   }
   printf("Relative humidity: %f\n", humidity);
   printf("Temperature: %f\n", temperature);
+  DHT_deinit();
 }

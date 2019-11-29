@@ -38,10 +38,11 @@ enum Error {
 #define SENSOR_COOLDOWN_TIME_US 500000  // Trial and error magic number to reset sensor
 #define SENSOR_COOLDOWN_TIME_NS 500000000
 
-// Sets up BCM2835 driver
+// Set up and tear down BCM2835 driver
 int DHT_init(const int pin);
+int DHT_deinit(void);
 
-// Reads data from DHT22
+// Read data from DHT22
 int DHT_read_data(const int pin,
                   const int max_retries,
                   double *humidity,

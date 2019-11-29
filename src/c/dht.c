@@ -14,7 +14,7 @@
 // ERROR_TIME if timeout_cycles has passed without the level changing
 static int level_or_error(const uint8_t pin, const uint16_t level,
                           const uint32_t timeout_cycles) {
-  for (int i = 0; i < timeout_cycles; i++) {
+  for (unsigned int i = 0; i < timeout_cycles; i++) {
     if (bcm2835_gpio_lev(pin) == level) {
       while (bcm2835_gpio_lev(pin) == level) { }
       return 0;
@@ -140,6 +140,12 @@ int DHT_init(const int pin) {
   // Set up the pin as having a pull-up resistor
   bcm2835_gpio_set_pud(pin, BCM2835_GPIO_PUD_UP);
 
+  return 0;
+}
+
+// Frees memory allocated by bcm2835_init()
+int DHT_deinit() {
+  bcm2835_close();
   return 0;
 }
 

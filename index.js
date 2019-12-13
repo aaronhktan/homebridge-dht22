@@ -172,7 +172,7 @@ DHTAccessory.prototype.setUpMQTT = function() {
 // Sends data to MQTT broker
 DHTAccessory.prototype.publishToMQTT = function(topic, value) {
   if (!this.mqttClient.connected || !topic || !value) {
-    this.log.error("MQTT client not connect, or no topic or value for MQTT");
+    this.log.error("MQTT client not connected, or no topic or value for MQTT");
     return;
   }
   this.mqttClient.publish(topic, String(value));
@@ -198,7 +198,7 @@ DHTAccessory.prototype.refreshData = function() {
   this.log(`Temp: ${data.temp}, Hum: ${data.hum}`);
   this.temp = data.temp;
   this.hum = data.hum;
- }
+}
 
 DHTAccessory.prototype.getServices = function() {
   return [this.informationService,

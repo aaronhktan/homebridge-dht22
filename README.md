@@ -4,6 +4,8 @@ This is a Homebridge plugin for DHT22 temperature and humidity sensor, working o
 
 It uses the BCM2835 GPIO library.
 
+<img src="/docs/eve.png?raw=true" style="margin: 5px"> <img src="/docs/home.png?raw=true" style="margin: 5px">
+
 ## Configuration
 
 | Field name           | Description                                                   | Type / Unit    | Default value       | Required? |

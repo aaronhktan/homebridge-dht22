@@ -156,8 +156,8 @@ DHTAccessory.prototype.setUpMQTT = function() {
   }
 
   this.mqttUrl = this.mqttConfig.url;
-  this.temperatureTopic = this.mqttConfig.temperatureTopic || 'temperature';
-  this.humidityTopic = this.mqttConfig.humidityTopic || 'humidity';
+  this.temperatureTopic = this.mqttConfig.temperatureTopic || 'dht22/temperature';
+  this.humidityTopic = this.mqttConfig.humidityTopic || 'dht22/humidity';
 
   this.mqttClient = mqtt.connect(this.mqttUrl);
   this.mqttClient.on("connect", () => {

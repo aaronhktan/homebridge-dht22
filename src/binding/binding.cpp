@@ -18,12 +18,14 @@ Napi::Object getData(const Napi::CallbackInfo &info) {
   // Init pin
   int err = DHT_init(pin);
   if (err) {
+    DHT_deinit();
     return BindingUtils::errFactory(env, err, "Could not initialize pin");
   }
 
   // Read data
   err = DHT_read_data(pin, retries, &humidity, &temperature);
   if (err) {
+    DHT_deinit();
     return BindingUtils::errFactory(env, err, "Could not read data");
   }
 

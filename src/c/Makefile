@@ -10,8 +10,6 @@ SRCS = dht-cli.c dht.c bcm2835.c
 OBJS = dht-cli.o dht.o bcm2835.o
 TARGETS = dht-cli debug
 
-all: ${TARGETS}
-
 dht-cli: $(OBJS)
 	$(LD) -o $@ $^ $(LDLIBS) $(LDFLAGS)
 

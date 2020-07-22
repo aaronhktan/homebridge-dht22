@@ -7,6 +7,7 @@ It uses the BCM2835 GPIO library.
 <img src="/docs/eve.png?raw=true" style="margin: 5px"> <img src="/docs/home.png?raw=true" style="margin: 5px">
 
 ## Configuration
+**Before running this plugin, you must add the `homebridge` user to the `gpio` group so Homebridge can access the GPIO interface. `sudo adduser homebridge gpio`**
 
 | Field name           | Description                                                   | Type / Unit    | Default value       | Required? |
 | -------------------- |:--------------------------------------------------------------|:--------------:|:-------------------:|:---------:|

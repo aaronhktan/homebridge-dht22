@@ -17,7 +17,7 @@ module.exports = homebridge => {
   FakeGatoHistoryService = require('fakegato-history')(homebridge);
 
   // Name of plugin, name of accessory, constructor
-  homebridge.registerAccessory("homebridge-dht22", "DHT22", DHTAccessory);
+  homebridge.registerAccessory('homebridge-dht22', 'DHT22', DHTAccessory);
 }
 
 // DHT constructor
@@ -48,8 +48,8 @@ function DHTAccessory(log, config) {
   // Override some information about the accessory
   let informationService = new Service.AccessoryInformation();
   informationService
-    .setCharacteristic(Characteristic.Manufacturer, "Adafruit")
-    .setCharacteristic(Characteristic.Model, "DHT22")
+    .setCharacteristic(Characteristic.Manufacturer, 'Adafruit')
+    .setCharacteristic(Characteristic.Model, 'DHT22')
     .setCharacteristic(Characteristic.SerialNumber, `${os.hostname}-${this.pin}`)
     .setCharacteristic(Characteristic.FirmwareRevision, require('./package.json').version);
 
@@ -64,7 +64,7 @@ function DHTAccessory(log, config) {
 
   // Start FakeGato for logging historical data
   if (this.enableFakeGato) {
-    this.fakeGatoHistoryService = new FakeGatoHistoryService("weather", this, {
+    this.fakeGatoHistoryService = new FakeGatoHistoryService('weather', this, {
       storage: 'fs',
       filename: `DHT22-${os.hostname}-${this.pin}.json`,
       folder: this.fakeGatoStoragePath
@@ -83,7 +83,7 @@ function DHTAccessory(log, config) {
 }
 
 // Getters and setters for temperature and humidity
-Object.defineProperty(DHTAccessory.prototype, "temp", {
+Object.defineProperty(DHTAccessory.prototype, 'temp', {
   set: function(temperatureReading) {
     // Check if read data is out of bounds of max delta
     if (Math.abs(temperatureReading + this.tempOffset - this._currentTemperature)
@@ -114,7 +114,7 @@ Object.defineProperty(DHTAccessory.prototype, "temp", {
   }
 });
 
-Object.defineProperty(DHTAccessory.prototype, "hum", {
+Object.defineProperty(DHTAccessory.prototype, 'hum', {
   set: function(humidityReading) {
     if (Math.abs(humidityReading + this.humOffset - this._currentHumidity)
           > this.maxHumDelta
@@ -146,12 +146,12 @@ Object.defineProperty(DHTAccessory.prototype, "hum", {
 // Sets up MQTT client so that we can send data
 DHTAccessory.prototype.setUpMQTT = function() {
   if (!this.enableMQTT) {
-    this.log.info("MQTT not enabled");
+    this.log.info('MQTT not enabled');
     return;
   }
 
   if (!this.mqttConfig) {
-    this.log.error("No MQTT config found");
+    this.log.error('No MQTT config found');
     return;
   }
 
@@ -160,10 +160,10 @@ DHTAccessory.prototype.setUpMQTT = function() {
   this.humidityTopic = this.mqttConfig.humidityTopic || 'dht22/humidity';
 
   this.mqttClient = mqtt.connect(this.mqttUrl);
-  this.mqttClient.on("connect", () => {
+  this.mqttClient.on('connect', () => {
     this.log(`MQTT client connected to ${this.mqttUrl}`);
   });
-  this.mqttClient.on("error", (err) => {
+  this.mqttClient.on('error', (err) => {
     this.log(`MQTT client error: ${err}`);
     client.end();
   });
@@ -172,7 +172,7 @@ DHTAccessory.prototype.setUpMQTT = function() {
 // Sends data to MQTT broker
 DHTAccessory.prototype.publishToMQTT = function(topic, value) {
   if (!this.mqttClient.connected || !topic || !value) {
-    this.log.error("MQTT client not connected, or no topic or value for MQTT");
+    this.log.error('MQTT client not connected, or no topic or value for MQTT');
     return;
   }
   this.mqttClient.publish(topic, String(value));

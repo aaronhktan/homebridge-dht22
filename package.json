@@ -7,7 +7,7 @@
   "dependencies": {
     "bindings": "^1.5.0",
     "fakegato-history": "^0.5.6",
-    "moment": "^2.4.0",
+    "moment": "^2.29.4",
     "mqtt": "^3.0.0",
     "node-addon-api": "^1.0.0"
   },
